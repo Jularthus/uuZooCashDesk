@@ -1,155 +1,63 @@
 ```mermaid
-classDiagram
-    class Zoo {
-        +turnstiles: Turnstile[]
-        +desks: Shop[]
-        +website: Shop
-        +getTurnstile(index): Turnstile
-        +getEnterTurnstile(index): Turnstile
-        +getExitTurnstile(index): Turnstile
-        +getDesk(index): Shop
-        +addTurnstile(type): void
-    }
+flowchart TD
 
-    class CommandOrder {
-        +execute(): void
-        +undo(): void
-        +redo(): void
-        -history: CommandOrder[]
-        -stack: CommandOrder[]
-        -order: Order
-        -price: int
-        +getPrice(): int
-    }
+    %% Singleton Pattern
+    DB[DatabaseSingleton]
+    DB_note[Singleton Pattern]
+    DB -.-> DB_note
 
-    class AdultConcreteCommand {
-        -price: int
-        -quantity: int
-        +execute(): void
-        +undo(): void
-        +getPrice(): int
-    }
+    %% Strategy Pattern
+    TicketService[TicketService]
+    TariffStrategy[TariffStrategy]
+    ChildTariff[ChildTariff]
+    AdultTariff[AdultTariff]
+    StudentTariff[StudentTariff]
+    TariffStrategy_note[Strategy Pattern]
+    TariffStrategy -.-> TariffStrategy_note
 
-    class StudentConcreteCommand {
-        -price: int
-        -quantity: int
-        +execute(): void
-        +undo(): void
-        +getPrice(): int
-    }
+    TicketService --> TariffStrategy
+    TariffStrategy --> ChildTariff
+    TariffStrategy --> AdultTariff
+    TariffStrategy --> StudentTariff
 
-    class ChildConcreteCommand {
-        -price: int
-        -quantity: int
-        +execute(): void
-        +undo(): void
-        +getPrice(): int
-    }
+    %% Observer Pattern
+    NotificationService[NotificationService]
+    TicketSale[TicketSale]
+    NotificationService_note[Observer Pattern]
+    NotificationService -.-> NotificationService_note
 
-    class PaymentFactory {
-        +paymentType: string
-        +constructor(paymentType): PaymentBuilder
-    }
+    TicketService -- notifies --> NotificationService
+    TicketService -- triggers --> TicketSale
+    TicketSale -- notifies --> NotificationService
 
-    class CardPaymentBuilder {
-        +id: int
-        +ccv: int
-        +expiration: string
-        +beneficiary: string
-        +setId(id): void
-        +setCcv(ccv): void
-        +setExpiration(expiration): void
-        +setBeneficiary(beneficiary): void
-        +pay(price): void
-    }
+    %% Adapter Pattern
+    TurnstileIntegration[TurnstileIntegration]
+    TurnstileAdapter[TurnstileAdapter]
+    LegacyTurnstileAPI[LegacyTurnstileAPI]
+    TurnstileAdapter_note[Adapter Pattern]
+    TurnstileAdapter -.-> TurnstileAdapter_note
 
-    class CashPaymentBuilder {
-        +isDesk: boolean
-        +pay(price): void
-    }
+    TicketService --> TurnstileIntegration
+    TurnstileIntegration --> TurnstileAdapter
+    TurnstileAdapter --> LegacyTurnstileAPI
 
-    class BitcoinPaymentBuilder {
-        +address: string
-        +setAddress(address): void
-        +pay(price): void
-    }
+    %% Decorator Pattern
+    Ticket[Ticket]
+    TicketDecorator[TicketDecorator]
+    VIPDecorator[VIPDecorator]
+    GuidedTourDecorator[GuidedTourDecorator]
+    InsuranceDecorator[InsuranceDecorator]
+    TicketDecorator_note[Decorator Pattern]
+    TicketDecorator -.-> TicketDecorator_note
 
-    class Ticket {
-        +save(): void
-        +print(): void
-        +notify(): void
-        +useTicket(): void
-        +type: string
-        +id: string
-        +isUsed: boolean
-    }
+    TicketService --> Ticket
+    Ticket --> TicketDecorator
+    TicketDecorator --> VIPDecorator
+    TicketDecorator --> GuidedTourDecorator
+    TicketDecorator --> InsuranceDecorator
 
-    class GetTickets {
-        -order: Order
-        +buildTickets(): Ticket[]
-        +buildOnlineTickets(): Ticket[]
-        -makeId(): string
-    }
-
-    class DatabaseSingleton {
-        +tickets: Ticket[]
-        +peopleOnSite: int
-        +reset(): void
-        +checkTicket(ticket): boolean
-        +addPeopleOnSite(): void
-        +removePeopleOnSite(): void
-    }
-
-    class Shop {
-        +isDesk: boolean
-        +orderCommand: CommandOrder
-        +reduction: Reduction
-        +paymentEngine: PaymentBuilder
-        +paymentDone: boolean
-        +getTickets(): Ticket[]
-        +setPaymentType(): void
-        +execPayment(): void
-        +createReduction(): void
-    }
-
-    class Turnstile {
-        +isOut: boolean
-        +handlers: Function[]
-        +enter(ticket): boolean
-        +exit(): void
-        +subscribe(fn): void
-        +unsubscribe(fn): void
-    }
-
-    class Reduction {
-        +reduction: int
-        +applyReduction(price): int
-    }
-
-    class ViewSingleton {
-        +info(): void
-    }
-
-    %% Inheritance and implementation
-    CommandOrder <|-- AdultConcreteCommand
-    CommandOrder <|-- StudentConcreteCommand
-    CommandOrder <|-- ChildConcreteCommand
-
-    PaymentFactory <|.. CardPaymentBuilder
-    PaymentFactory <|.. CashPaymentBuilder
-    PaymentFactory <|.. BitcoinPaymentBuilder
-
-    %% Composition/Association
-    Shop o-- CommandOrder
-    Shop o-- PaymentFactory
-    Shop o-- Reduction
-
-    Zoo o-- Shop
-    Zoo o-- Turnstile
-
-    DatabaseSingleton <.. Turnstile
-    DatabaseSingleton <.. ViewSingleton
-    DatabaseSingleton <.. Ticket : Observer
-
-    Ticket <-- GetTickets
+    %% Main flow
+    UI[User Interface]
+    UI --> TicketService
+    TicketService --> DB
 '''
