@@ -2,6 +2,7 @@
 
 ```mermaid
 
+
 classDiagram
 
 	class Zoo {
@@ -76,7 +77,7 @@ classDiagram
 		- applyReduction()
 	}
 
-	class TicketsManager_proxy {
+	class TicketManager_proxy {
 		- newTicket()
 		- removeTicket()
 	}
@@ -91,10 +92,11 @@ classDiagram
 	TicketType_strategy <|.. Child_strategy : extends
 	TicketType_strategy <|.. Student_strategy : extends
 	Reduction_strategy --> Payment_factory : executes
-	Payment_factory --> TicketsManager_proxy : addTicket
+	Payment_factory --> TicketManager_proxy : addTicket
 	Payment_factory <|.. CardPayment_builder : build
 	Payment_factory <|.. CashPayment_builder : build
 	TicketManager_proxy <-- Database : proxy
 	TicketManager_proxy <-- Ticket : implements
+	
 	
 ```
