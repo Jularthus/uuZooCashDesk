@@ -1,63 +1,100 @@
+# Global schema
+
 ```mermaid
-flowchart TD
 
-    %% Singleton Pattern
-    DB[DatabaseSingleton]
-    DB_note[Singleton Pattern]
-    DB -.-> DB_note
+classDiagram
 
-    %% Strategy Pattern
-    TicketService[TicketService]
-    TariffStrategy[TariffStrategy]
-    ChildTariff[ChildTariff]
-    AdultTariff[AdultTariff]
-    StudentTariff[StudentTariff]
-    TariffStrategy_note[Strategy Pattern]
-    TariffStrategy -.-> TariffStrategy_note
+	class Zoo {
+		+ turnstiles
+		+ shop
+	}
 
-    TicketService --> TariffStrategy
-    TariffStrategy --> ChildTariff
-    TariffStrategy --> AdultTariff
-    TariffStrategy --> StudentTariff
+	class Turnstiles {
+		- enterZoo()
+		- exitZoo()
+	}
 
-    %% Observer Pattern
-    NotificationService[NotificationService]
-    TicketSale[TicketSale]
-    NotificationService_note[Observer Pattern]
-    NotificationService -.-> NotificationService_note
+	class TicketManager_proxy {
+		- createTicket()
+		- addTicket(id)
+		- deleteTicket(id)
+	}
 
-    TicketService -- notifies --> NotificationService
-    TicketService -- triggers --> TicketSale
-    TicketSale -- notifies --> NotificationService
+	class Ticket {
+		+ pricing_stategy
+		+ number_of_tickets
+		+ id
+		+ purchase_date
+		+ is_valid
+	}
 
-    %% Adapter Pattern
-    TurnstileIntegration[TurnstileIntegration]
-    TurnstileAdapter[TurnstileAdapter]
-    LegacyTurnstileAPI[LegacyTurnstileAPI]
-    TurnstileAdapter_note[Adapter Pattern]
-    TurnstileAdapter -.-> TurnstileAdapter_note
+	class Database {
+		+ tickets = Tickets[]
+	}
 
-    TicketService --> TurnstileIntegration
-    TurnstileIntegration --> TurnstileAdapter
-    TurnstileAdapter --> LegacyTurnstileAPI
+	class Shop_singleton {
+		- buyTicket()	
+	}
 
-    %% Decorator Pattern
-    Ticket[Ticket]
-    TicketDecorator[TicketDecorator]
-    VIPDecorator[VIPDecorator]
-    GuidedTourDecorator[GuidedTourDecorator]
-    InsuranceDecorator[InsuranceDecorator]
-    TicketDecorator_note[Decorator Pattern]
-    TicketDecorator -.-> TicketDecorator_note
+	class Order_command {
+		- execute()
+	}
 
-    TicketService --> Ticket
-    Ticket --> TicketDecorator
-    TicketDecorator --> VIPDecorator
-    TicketDecorator --> GuidedTourDecorator
-    TicketDecorator --> InsuranceDecorator
+	class Payment_factory {
+		+ payment_type
+		+ ticket_type
+		+ payment_id
+		- constructor(payment_infos)
+	}
 
-    %% Main flow
-    UI[User Interface]
-    UI --> TicketService
-    TicketService --> DB
-'''
+	class CardPayment_builder {
+		
+		- setId(id)
+		- setCcv(ccv)
+		- setExpiration(expiration)	
+		- setBeneficiary(beneficiary)
+		- pay(price)
+	}
+	class CashPayment_builder {
+		- pay(price)
+	}
+
+	class TicketType_strategy {
+		- applyPrice(ticket_type)	
+	}
+	class Adult_strategy {
+		- applyPrice()
+	}
+	class Child_strategy {
+		- applyPrice()
+	}
+	class Student_strategy {
+		- applyPrice()
+	}
+
+	class Reduction_strategy {
+		- applyReduction()
+	}
+
+	class TicketsManager_proxy {
+		- newTicket()
+		- removeTicket()
+	}
+
+	Zoo o-- Shop_singleton 
+	Zoo o-- Turnstiles
+	Turnstiles --> TicketManager_proxy : commands
+	Shop_singleton <-- Order_command : implements
+	Order_command --> TicketType_strategy : executes
+	TicketType_strategy --> Reduction_strategy : executes
+	TicketType_strategy <|.. Adult_strategy : extends
+	TicketType_strategy <|.. Child_strategy : extends
+	TicketType_strategy <|.. Student_strategy : extends
+	Reduction_strategy --> Payment_factory : executes
+	Payment_factory --> TicketsManager_proxy : addTicket
+	Payment_factory <|.. CardPayment_builder : build
+	Payment_factory <|.. CashPayment_builder : build
+	TicketManager_proxy <-- Database : proxy
+	TicketManager_proxy <-- Ticket : implements
+	
+```

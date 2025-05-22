@@ -17,12 +17,12 @@ Cash register information system also supports:
 
 ### Outputs
 
-    - High level design of the system
-    - Detailed design of particular parts of the system in which the chosen design patterns were applied
-    - Brief introduction of the applied patterns
-    - Explanation of the pattern usage
-        - what the design pattern was used for
-        - reasons of usage
-        - evaluation of suitability
-        - advantages
-        - possible alternatives
+- High level design of the system
+- Detailed design of particular parts of the system in which the chosen design patterns were applied
+- Brief introduction of the applied patterns
+- Explanation of the pattern usage
+    - what the design pattern was used for
+    - reasons of usage
+    - evaluation of suitability
+    - advantages
+    - possible alternatives
