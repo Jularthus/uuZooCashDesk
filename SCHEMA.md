@@ -1,68 +1,154 @@
-flowchart TD
+classDiagram
+    class Zoo {
+        +turnstiles: Turnstile[]
+        +desks: Shop[]
+        +website: Shop
+        +getTurnstile(index): Turnstile
+        +getEnterTurnstile(index): Turnstile
+        +getExitTurnstile(index): Turnstile
+        +getDesk(index): Shop
+        +addTurnstile(type): void
+    }
 
-    subgraph UI["User Interface"]
-      A1[On-site Cash Register UI]
-      A2[Online Ticket Portal]
-    end
+    class CommandOrder {
+        +execute(): void
+        +undo(): void
+        +redo(): void
+        -history: CommandOrder[]
+        -stack: CommandOrder[]
+        -order: Order
+        -price: int
+        +getPrice(): int
+    }
 
-    subgraph Application["Application Layer"]
-      B1[Ticket Service]
-      B2[Payment Service]
-      B3[Turnstile Integration]
-      B4[Reporting Service]
-      B5[Tariff Manager<br/>(Strategy Pattern)]
-      B6[Notification Service<br/>(Observer Pattern)]
-    end
+    class AdultConcreteCommand {
+        -price: int
+        -quantity: int
+        +execute(): void
+        +undo(): void
+        +getPrice(): int
+    }
 
-    subgraph Domain["Domain Model"]
-      C1[Ticket]
-      C2[Tariff (abstract)]
-      C2a[ChildTariff]
-      C2b[AdultTariff]
-      C2c[StudentTariff]
-      C3[Payment<br/>(Builder Pattern)]
-      C4[TurnstileAdapter<br/>(Adapter Pattern)]
-    end
+    class StudentConcreteCommand {
+        -price: int
+        -quantity: int
+        +execute(): void
+        +undo(): void
+        +getPrice(): int
+    }
 
-    subgraph Data["Persistence Layer"]
-      D1[Database]
-    end
+    class ChildConcreteCommand {
+        -price: int
+        -quantity: int
+        +execute(): void
+        +undo(): void
+        +getPrice(): int
+    }
 
-    %% UI interactions
-    A1 -->|sell ticket| B1
-    A2 -->|buy ticket| B1
+    class PaymentFactory {
+        +paymentType: string
+        +constructor(paymentType): PaymentBuilder
+    }
 
-    %% Ticket service interactions
-    B1 -->|calculate price| B5
-    B1 -->|create payment| B2
-    B1 -->|notify sale| B6
-    B1 --> C1
+    class CardPaymentBuilder {
+        +id: int
+        +ccv: int
+        +expiration: string
+        +beneficiary: string
+        +setId(id): void
+        +setCcv(ccv): void
+        +setExpiration(expiration): void
+        +setBeneficiary(beneficiary): void
+        +pay(price): void
+    }
 
-    %% Tariff strategies
-    B5 -- uses --> C2
-    C2 --> C2a
-    C2 --> C2b
-    C2 --> C2c
+    class CashPaymentBuilder {
+        +isDesk: boolean
+        +pay(price): void
+    }
 
-    %% Payment builder
-    B2 -->|build payment| C3
+    class BitcoinPaymentBuilder {
+        +address: string
+        +setAddress(address): void
+        +pay(price): void
+    }
 
-    %% Turnstile integration
-    B1 -->|validate ticket| B3
-    B3 --> C4
-    C4 -->|interact| D1
+    class Ticket {
+        +save(): void
+        +print(): void
+        +notify(): void
+        +useTicket(): void
+        +type: string
+        +id: string
+        +isUsed: boolean
+    }
 
-    %% Reporting
-    B1 -->|send event| B4
-    B4 -->|query| D1
+    class GetTickets {
+        -order: Order
+        +buildTickets(): Ticket[]
+        +buildOnlineTickets(): Ticket[]
+        -makeId(): string
+    }
 
-    %% Persistence
-    C1 --> D1
-    C3 --> D1
+    class DatabaseSingleton {
+        +tickets: Ticket[]
+        +peopleOnSite: int
+        +reset(): void
+        +checkTicket(ticket): boolean
+        +addPeopleOnSite(): void
+        +removePeopleOnSite(): void
+    }
 
-    %% Observer pattern for notifications
-    B1 -. notify observers .-> B6
+    class Shop {
+        +isDesk: boolean
+        +orderCommand: CommandOrder
+        +reduction: Reduction
+        +paymentEngine: PaymentBuilder
+        +paymentDone: boolean
+        +getTickets(): Ticket[]
+        +setPaymentType(): void
+        +execPayment(): void
+        +createReduction(): void
+    }
 
-    %% Extra notes for design patterns
-    classDef pattern fill:#f6f,stroke:#333,stroke-width:2px
-    B5,B6,C4,C3 class pattern
+    class Turnstile {
+        +isOut: boolean
+        +handlers: Function[]
+        +enter(ticket): boolean
+        +exit(): void
+        +subscribe(fn): void
+        +unsubscribe(fn): void
+    }
+
+    class Reduction {
+        +reduction: int
+        +applyReduction(price): int
+    }
+
+    class ViewSingleton {
+        +info(): void
+    }
+
+    %% Inheritance and implementation
+    CommandOrder <|-- AdultConcreteCommand
+    CommandOrder <|-- StudentConcreteCommand
+    CommandOrder <|-- ChildConcreteCommand
+
+    PaymentFactory <|.. CardPaymentBuilder
+    PaymentFactory <|.. CashPaymentBuilder
+    PaymentFactory <|.. BitcoinPaymentBuilder
+
+    %% Composition/Association
+    Shop o-- CommandOrder
+    Shop o-- PaymentFactory
+    Shop o-- Reduction
+
+    Zoo o-- Shop
+    Zoo o-- Turnstile
+
+    DatabaseSingleton <.. Turnstile
+    DatabaseSingleton <.. ViewSingleton
+    DatabaseSingleton <.. Ticket : Observer
+
+    Ticket <-- GetTickets
+'''
